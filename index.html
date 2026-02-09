@@ -1,0 +1,1805 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Culture Shock Warm‑Up</title>
+  <style>
+    :root {
+      --bg: #f6f5f4;
+      --ink: #1f1f1f;
+      --muted: #6f6f6f;
+      --primary: #2f3437;
+      --accent: #2f3437;
+      --card: #ffffff;
+      --border: #ece8e3;
+      --shadow: 0 10px 24px rgba(31, 31, 31, 0.08);
+      --shadow-soft: 0 8px 22px rgba(31, 31, 31, 0.10);
+      --radius: 18px;
+      --font-display: "Literata", "Georgia", serif;
+      --font-body: "Work Sans", "Helvetica Neue", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: var(--font-body);
+      color: var(--ink);
+      background: var(--bg);
+      min-height: 100vh;
+      position: relative;
+    }
+
+    .bg {
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(circle at 12% 18%, rgba(210, 205, 199, 0.45), transparent 42%),
+        radial-gradient(circle at 88% 12%, rgba(220, 214, 206, 0.45), transparent 48%),
+        linear-gradient(160deg, #fbfaf9 0%, #f3f2f0 100%);
+      z-index: -1;
+    }
+
+    .emoji-decor {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 1;
+      opacity: 0.7;
+    }
+
+    .emoji-decor span {
+      position: absolute;
+      font-size: 30px;
+      filter: blur(0.1px);
+      opacity: 0.85;
+      transform: translateZ(0);
+    }
+
+    .emoji-decor .e1 { top: 10%; left: 10%; }
+    .emoji-decor .e2 { top: 16%; right: 14%; }
+    .emoji-decor .e3 { bottom: 22%; left: 14%; }
+    .emoji-decor .e4 { bottom: 10%; right: 14%; }
+    .emoji-decor .e5 { top: 46%; left: 6%; }
+    .emoji-decor .e6 { top: 52%; right: 6%; }
+
+    .emoji-decor .behind {
+      opacity: 0.35;
+      filter: blur(0.6px);
+      z-index: 0;
+    }
+
+    .emoji-decor .front {
+      z-index: 3;
+      opacity: 0.9;
+      filter: none;
+    }
+
+    .flash {
+      position: fixed;
+      inset: 0;
+      background: rgba(255, 255, 255, 0.6);
+      opacity: 0;
+      pointer-events: none;
+      z-index: 5;
+      transition: opacity 200ms ease;
+    }
+
+    .flash.show {
+      opacity: 1;
+    }
+
+    .top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 28px 48px 14px;
+      gap: 20px;
+    }
+
+    .time-banner {
+      position: fixed;
+      top: 16px;
+      left: 16px;
+      background: #111;
+      color: #fff;
+      padding: 8px 12px;
+      border-radius: 10px;
+      font-size: 12px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      opacity: 0;
+      transform: translateY(-6px);
+      transition: opacity 220ms ease, transform 220ms ease;
+      z-index: 6;
+    }
+
+    .time-banner.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .brand {
+      display: flex;
+      gap: 14px;
+      align-items: center;
+    }
+
+    .logo {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      background: var(--primary);
+      color: white;
+      display: grid;
+      place-items: center;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+
+    .title {
+      font-family: var(--font-display);
+      font-size: 24px;
+    }
+
+    .subtitle {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      border: 1px solid var(--border);
+      background: white;
+      padding: 8px 14px;
+      border-radius: 999px;
+      cursor: pointer;
+      font-weight: 600;
+      color: var(--accent);
+    }
+
+    .btn.primary {
+      background: var(--primary);
+      color: white;
+      border-color: transparent;
+    }
+
+    .toggle {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+      padding: 6px 48px 28px;
+    }
+
+    .setup {
+      grid-column: 1 / -1;
+      max-width: 900px;
+      justify-self: center;
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 18px;
+      box-shadow: var(--shadow-soft);
+      border: 1px solid var(--border);
+      position: relative;
+      z-index: 2;
+    }
+
+    .card h2 {
+      margin: 0 0 12px;
+      font-size: 18px;
+      font-family: var(--font-display);
+    }
+
+    .field {
+      display: grid;
+      gap: 6px;
+      margin-bottom: 14px;
+    }
+
+    .field label {
+      font-size: 12px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    input, select, textarea {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px 12px;
+      font-family: var(--font-body);
+      font-size: 14px;
+      background: #fff;
+    }
+
+    textarea { resize: vertical; min-height: 80px; }
+
+    .rules {
+      background: #f7f6f5;
+      border-radius: 12px;
+      padding: 10px;
+      font-size: 13px;
+      color: var(--accent);
+    }
+
+    .members {
+      display: grid;
+      gap: 6px;
+      font-size: 13px;
+    }
+
+    .member {
+      display: flex;
+      justify-content: space-between;
+      padding: 6px 10px;
+      background: #f7f6f5;
+      border-radius: 10px;
+    }
+
+    .stage-inline {
+      display: grid;
+      gap: 4px;
+    }
+
+    .stage-title {
+      font-weight: 700;
+      font-size: 14px;
+    }
+
+    .stage-desc {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .timer-inline {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .timer-value {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+    }
+
+    .chat {
+      display: grid;
+      grid-template-rows: auto 1fr;
+      height: 520px;
+    }
+
+    .chat-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .progress {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+      margin-top: 10px;
+      max-width: 360px;
+    }
+
+    .progress .seg {
+      height: 6px;
+      background: #ece7e1;
+      border-radius: 999px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .progress .seg::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: #2f3437;
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 300ms ease;
+    }
+
+    .progress .seg.active::after {
+      transform: scaleX(1);
+    }
+
+    .chat-body {
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      gap: 8px;
+    }
+
+    .chat-log {
+      padding: 10px;
+      background: #f7f6f5;
+      border-radius: 14px;
+      overflow-y: auto;
+      display: grid;
+      gap: 10px;
+      min-height: 0;
+      flex: 1;
+      border: 1px solid #ebe6e0;
+      box-shadow: inset 0 1px 0 rgba(0, 0, 0, 0.02);
+      backdrop-filter: blur(8px);
+    }
+
+    .message {
+      display: grid;
+      gap: 4px;
+      font-size: 14px;
+      align-items: flex-start;
+    }
+
+    .message .meta {
+      font-size: 11px;
+      color: var(--muted);
+      max-width: 70%;
+    }
+
+    .message .bubble {
+      background: rgba(255, 255, 255, 0.76);
+      border-radius: 20px;
+      padding: 10px 15px;
+      border: 1px solid rgba(230, 224, 217, 0.9);
+      white-space: pre-wrap;
+      display: inline-block;
+      max-width: 70%;
+      width: fit-content;
+      box-shadow: 0 6px 18px rgba(31, 31, 31, 0.08);
+      backdrop-filter: blur(10px);
+    }
+
+    .message.self .bubble {
+      border-color: var(--primary);
+      box-shadow: 0 6px 14px rgba(47, 52, 55, 0.15);
+      margin-left: auto;
+    }
+
+    .message.self {
+      align-items: flex-end;
+    }
+
+    .message.self .meta {
+      text-align: right;
+    }
+
+    .typing {
+      font-size: 12px;
+      color: var(--muted);
+      padding: 6px 4px 0 8px;
+    }
+
+    .hidden { display: none; }
+
+    .composer {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      margin-top: 8px;
+    }
+
+    .composer textarea {
+      min-height: 56px;
+      max-height: 90px;
+    }
+
+    .translator .output {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .output-text {
+      flex: 1;
+      min-height: 42px;
+      padding: 10px 12px;
+      background: #f7f6f5;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      font-size: 14px;
+      white-space: pre-wrap;
+    }
+
+    .dictionary {
+      display: grid;
+      gap: 6px;
+      font-size: 13px;
+    }
+
+    .dictionary-item {
+      padding: 6px 10px;
+      background: #f7f6f5;
+      border-radius: 10px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 14px;
+    }
+
+    .culture-card {
+      padding: 14px;
+      border-radius: 16px;
+      background: #f7f6f5;
+      border: 1px solid var(--border);
+      display: grid;
+      gap: 8px;
+      box-shadow: 0 6px 14px rgba(31, 31, 31, 0.06);
+    }
+
+    .culture-card .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #4b4b4b;
+      background: #ffffff;
+      border: 1px solid #ece7e1;
+      border-radius: 999px;
+      padding: 4px 8px;
+      width: fit-content;
+    }
+
+    .culture-card .name { font-weight: 700; }
+
+    .foot {
+      padding: 10px 48px 40px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .actions {
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    @media (max-width: 1100px) {
+      .layout { grid-template-columns: 1fr; }
+      .top { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg" aria-hidden="true"></div>
+  <div class="emoji-decor" aria-hidden="true">
+    <span class="e1 behind">😵‍💫</span>
+    <span class="e2 front">😶‍🌫️</span>
+    <span class="e3 behind">🫠</span>
+    <span class="e4 front">🤯</span>
+    <span class="e5 behind">🙃</span>
+    <span class="e6 front">😬</span>
+  </div>
+  <div id="flash" class="flash" aria-hidden="true"></div>
+  <div id="timeBanner" class="time-banner">Time's up</div>
+  <header class="top">
+    <div class="brand">
+      <div class="logo">CS</div>
+      <div>
+        <div class="title">Culture Shock Warm‑Up</div>
+        <div class="subtitle">Solo Demo · 3 Cultures · 10‑Minute Flow</div>
+      </div>
+    </div>
+    <div class="controls">
+      <label class="toggle">
+        <input type="checkbox" id="demoSpeed" />
+        <span>Demo Speed</span>
+      </label>
+    </div>
+  </header>
+
+  <main class="layout">
+    <section id="screenSetup" class="card setup">
+      <h2>Setup</h2>
+      <div class="field">
+        <label for="nameInput">Your Name</label>
+        <input id="nameInput" placeholder="e.g., Mia" />
+      </div>
+      <div class="field">
+        <label for="groupSelect">Choose Room (A / B / C)</label>
+        <select id="groupSelect"></select>
+      </div>
+      <div class="field">
+        <label>Realtime Status</label>
+        <div id="realtimeStatus" class="rules">Not connected</div>
+      </div>
+      <div class="field">
+        <label for="cultureSelect">Choose Your Culture</label>
+        <select id="cultureSelect"></select>
+      </div>
+      <div class="field">
+        <label>Your Culture Rules</label>
+        <div id="cultureRules" class="rules"></div>
+      </div>
+      <div class="field">
+        <label>Online in Room</label>
+        <div id="memberList" class="members"></div>
+      </div>
+      <div class="field">
+        <label>All Cultures (shown before start)</label>
+        <div class="grid" id="cultureGrid"></div>
+      </div>
+      <div class="actions">
+        <button id="startBtn" class="btn primary">Start</button>
+      </div>
+    </section>
+
+    <section id="screenChat" class="card chat hidden">
+      <div class="chat-header">
+        <div>
+          <h2>Group Chat</h2>
+          <div class="stage-inline">
+            <span id="stageTitle" class="stage-title">Waiting to start</span>
+            <span id="stageDesc" class="stage-desc"></span>
+          </div>
+          <div id="progressBar" class="progress"></div>
+        </div>
+        <div class="timer-inline">
+          <div id="timerDisplay" class="timer-value">10:00</div>
+          <button id="pauseBtn" class="btn">Pause</button>
+          <button id="resetBtn" class="btn">Reset</button>
+        </div>
+      </div>
+      <div class="chat-body">
+        <div id="chatLog" class="chat-log" aria-live="polite"></div>
+        <div id="typingRow" class="typing hidden">Someone is typing…</div>
+        <div class="composer">
+          <textarea id="chatInput" placeholder="Paste your translated message here…"></textarea>
+          <button id="sendBtn" class="btn primary">Send</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="screenTranslator" class="card translator hidden">
+      <h2>Private Translator (Only You Can See)</h2>
+      <div class="field">
+        <label for="plainInput">Plain Language Input</label>
+        <textarea id="plainInput" placeholder="e.g., I ate a croissant this morning."></textarea>
+      </div>
+      <div class="field">
+        <label for="translatedOutput">Translation Output</label>
+        <div class="output">
+          <div id="translatedOutput" class="output-text"></div>
+          <button id="copyBtn" class="btn">Copy</button>
+        </div>
+      </div>
+      <div class="field">
+        <label>Your Symbol Dictionary</label>
+        <div id="dictionary" class="dictionary"></div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <div>Note: Solo demo with AI‑simulated teammates. Multiplayer can be added with Firebase / Socket.io.</div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const cultures = {
+      emoji: {
+        id: "emoji",
+        name: "Emoji‑Only Culture",
+        description: "Output must be emojis only (no letters or numbers).",
+        rules: [
+          "Eye rolling = friendly",
+          "Smiling at them = rude",
+          "Unknown words -> closest‑meaning emoji",
+        ],
+        dictionary: [
+          ["greetings", "👋🙂"],
+          ["help/need", "🆘🙏"],
+          ["food/eat", "🍜🍔🍎"],
+          ["morning/time", "🌅⏰"],
+          ["home", "🏠"],
+          ["school/homework", "📚✍"],
+          ["work/job", "💼"],
+          ["sad/stressed", "😞😣"],
+          ["happy", "😄"],
+          ["unknown", "closest‑meaning emoji"],
+        ],
+      },
+      leet: {
+        id: "leet",
+        name: "Symbol+Number Language",
+        description: "Leetspeak substitution with occasional symbols.",
+        rules: [
+          "Silence = disagreement",
+          "Question mark is considered rude",
+        ],
+        dictionary: [
+          ["e→3", "3"],
+          ["a→4", "4"],
+          ["i→1", "1"],
+          ["o→0", "0"],
+          ["s→5", "5"],
+          ["symbols", "! # @"],
+        ],
+      },
+      reverse: {
+        id: "reverse",
+        name: "Reverse Direction Typing",
+        description: "Output must be fully reversed by characters.",
+        rules: [
+          "Any facial expression is rude",
+          "Eye contact is required to show respect",
+        ],
+        dictionary: [
+          ["rule", "reverse characters"],
+          ["example", "Hello -> olleH"],
+        ],
+      },
+    };
+
+    const rooms = ["A", "B", "C"];
+    const demoMembers = [
+      { name: "Avery", culture: "emoji" },
+      { name: "Kai", culture: "leet" },
+      { name: "Sora", culture: "reverse" },
+    ];
+
+    const stages = [
+      {
+        name: "1/4 Breakfast (2 min)",
+        seconds: 120,
+        prompt: "Share what you ate for breakfast or what you did this morning.",
+        aiMessages: [
+          "I ate a croissant and drank coffee.",
+          "I had toast with butter this morning.",
+          "I woke up late and grabbed a banana.",
+          "I made pancakes with honey.",
+          "I only drank tea this morning.",
+          "I ate noodles for breakfast.",
+        ],
+      },
+      {
+        name: "2/4 Childhood Memory (3 min)",
+        seconds: 180,
+        prompt: "Describe your favorite childhood memory.",
+        aiMessages: [
+          "I remember riding my bike in the park.",
+          "My favorite memory is drawing with my sister.",
+          "I used to build forts with blankets.",
+          "I loved visiting my grandparents house.",
+        ],
+      },
+      {
+        name: "3/4 Weekend Pitch (3 min)",
+        seconds: 180,
+        prompt: "Persuade the group to choose a weekend activity.",
+        aiMessages: [
+          "We should go hiking and take photos.",
+          "How about a museum trip together?",
+          "Let us choose a picnic by the river.",
+          "We could explore a new cafe downtown.",
+        ],
+      },
+      {
+        name: "4/4 Interests (2 min)",
+        seconds: 120,
+        prompt: "Share a recent interest or project you're working on.",
+        aiMessages: [
+          "I am working on a poster series.",
+          "I am learning to play guitar.",
+          "I am experimenting with cyanotype prints.",
+          "I want to make a short animation.",
+        ],
+      },
+    ];
+
+    const state = {
+      running: false,
+      elapsed: 0,
+      interval: null,
+      lastStageIndex: -1,
+      currentRoom: "A",
+      currentCulture: cultures.emoji,
+      userName: "You",
+      onlineMembers: [],
+    };
+
+    const REALTIME_ENABLED = true;
+    const SUPABASE_URL = "https://ijvbosocczxmkduxnciu.supabase.co";
+    const SUPABASE_ANON_KEY = "sb_publishable_inQSKngsVdiq39oYWvoYcQ_wCWAomHO";
+
+    const GPT_EMOJI_ENABLED = false;
+    const GPT_API_URL = "http://localhost:8787/emoji";
+    let gptTimer = null;
+    let gptRequestId = 0;
+    let gptAbortController = null;
+
+    let supabaseClient = null;
+    let roomChannel = null;
+    let typingUsers = new Map();
+    let typingTimeout = null;
+    const userId = (crypto && crypto.randomUUID) ? crypto.randomUUID() : `u_${Math.random().toString(36).slice(2, 10)}`;
+
+    const els = {
+      groupSelect: document.getElementById("groupSelect"),
+      cultureSelect: document.getElementById("cultureSelect"),
+      nameInput: document.getElementById("nameInput"),
+      memberList: document.getElementById("memberList"),
+      cultureRules: document.getElementById("cultureRules"),
+      realtimeStatus: document.getElementById("realtimeStatus"),
+      dictionary: document.getElementById("dictionary"),
+      cultureGrid: document.getElementById("cultureGrid"),
+      plainInput: document.getElementById("plainInput"),
+      translatedOutput: document.getElementById("translatedOutput"),
+      copyBtn: document.getElementById("copyBtn"),
+      chatInput: document.getElementById("chatInput"),
+      sendBtn: document.getElementById("sendBtn"),
+      chatLog: document.getElementById("chatLog"),
+      typingRow: document.getElementById("typingRow"),
+      startBtn: document.getElementById("startBtn"),
+      pauseBtn: document.getElementById("pauseBtn"),
+      resetBtn: document.getElementById("resetBtn"),
+      timerDisplay: document.getElementById("timerDisplay"),
+      stageTitle: document.getElementById("stageTitle"),
+      stageDesc: document.getElementById("stageDesc"),
+      demoSpeed: document.getElementById("demoSpeed"),
+      screenSetup: document.getElementById("screenSetup"),
+      screenChat: document.getElementById("screenChat"),
+      screenTranslator: document.getElementById("screenTranslator"),
+      flash: document.getElementById("flash"),
+      timeBanner: document.getElementById("timeBanner"),
+      progressBar: document.getElementById("progressBar"),
+    };
+
+    function init() {
+      renderGroupOptions();
+      renderCultureOptions();
+      renderMembers();
+      renderCultureInfo();
+      renderCultureGrid();
+      updateDictionary();
+      updateTranslation();
+      updateTimerDisplay();
+      updateStage(true);
+      renderProgressBar();
+      initRealtime();
+      bindEvents();
+    }
+
+    function isSupabaseConfigured() {
+      return SUPABASE_URL && SUPABASE_ANON_KEY &&
+        !SUPABASE_URL.includes("YOUR_") &&
+        !SUPABASE_ANON_KEY.includes("YOUR_");
+    }
+
+    function initRealtime() {
+      if (!REALTIME_ENABLED) {
+        els.realtimeStatus.textContent = "Realtime disabled (demo mode)";
+        return;
+      }
+      if (!isSupabaseConfigured()) {
+        els.realtimeStatus.textContent = "Missing Supabase keys";
+        return;
+      }
+      if (!window.supabase) {
+        els.realtimeStatus.textContent = "Supabase SDK not loaded";
+        return;
+      }
+      supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      els.realtimeStatus.textContent = "Connecting…";
+      joinRoom(state.currentRoom);
+    }
+
+    function joinRoom(roomId) {
+      if (!supabaseClient) return;
+      if (roomChannel) {
+        roomChannel.unsubscribe();
+        roomChannel = null;
+      }
+      typingUsers = new Map();
+      updateTypingRow();
+      els.chatLog.innerHTML = "";
+
+      roomChannel = supabaseClient.channel(`room-${roomId}`, {
+        config: {
+          broadcast: { self: true },
+          presence: { key: userId },
+        },
+      });
+
+      roomChannel.on("broadcast", { event: "chat" }, ({ payload }) => {
+        if (!payload) return;
+        const cultureName = cultures[payload.culture]?.name || payload.cultureName || "Unknown";
+        addMessage(payload.name, cultureName, payload.text, payload.userId === userId);
+      });
+
+      roomChannel.on("broadcast", { event: "typing" }, ({ payload }) => {
+        if (!payload || payload.userId === userId) return;
+        if (payload.isTyping) {
+          typingUsers.set(payload.userId, payload.name);
+        } else {
+          typingUsers.delete(payload.userId);
+        }
+        updateTypingRow();
+      });
+
+      roomChannel.on("presence", { event: "sync" }, () => {
+        updatePresenceList();
+      });
+
+      roomChannel.subscribe(async (status) => {
+        if (status === "SUBSCRIBED") {
+          await roomChannel.track({
+            userId,
+            name: state.userName,
+            culture: state.currentCulture.id,
+            joinedAt: new Date().toISOString(),
+          });
+          els.realtimeStatus.textContent = `Connected to Room ${roomId}`;
+        }
+        if (status === "CHANNEL_ERROR") {
+          els.realtimeStatus.textContent = "Realtime error";
+        }
+      });
+    }
+
+    function updatePresenceList() {
+      if (!roomChannel) return;
+      const presence = roomChannel.presenceState();
+      const members = [];
+      Object.values(presence).forEach((list) => {
+        list.forEach((p) => {
+          members.push({
+            name: p.name || "Guest",
+            culture: p.culture || "emoji",
+            isUser: p.userId === userId,
+          });
+        });
+      });
+      state.onlineMembers = members;
+      renderMembers();
+    }
+
+    function sendChatMessage(text) {
+      if (!roomChannel) return;
+      roomChannel.send({
+        type: "broadcast",
+        event: "chat",
+        payload: {
+          userId,
+          name: state.userName,
+          culture: state.currentCulture.id,
+          cultureName: state.currentCulture.name,
+          text,
+          timestamp: Date.now(),
+        },
+      });
+    }
+
+    function sendTyping(isTyping) {
+      if (!roomChannel) return;
+      roomChannel.send({
+        type: "broadcast",
+        event: "typing",
+        payload: {
+          userId,
+          name: state.userName,
+          isTyping,
+        },
+      });
+      if (typingTimeout) clearTimeout(typingTimeout);
+      typingTimeout = setTimeout(() => {
+        roomChannel.send({
+          type: "broadcast",
+          event: "typing",
+          payload: {
+            userId,
+            name: state.userName,
+            isTyping: false,
+          },
+        });
+      }, 1200);
+    }
+
+    function updateTypingRow() {
+      const names = Array.from(typingUsers.values());
+      if (!names.length) {
+        els.typingRow.classList.add("hidden");
+        return;
+      }
+      els.typingRow.classList.remove("hidden");
+      els.typingRow.textContent = `${names.join(", ")} is typing…`;
+    }
+
+    function renderProgressBar() {
+      els.progressBar.innerHTML = "";
+      stages.forEach((_stage, index) => {
+        const seg = document.createElement("div");
+        seg.className = "seg";
+        seg.dataset.index = index;
+        els.progressBar.appendChild(seg);
+      });
+    }
+
+    function renderGroupOptions() {
+      els.groupSelect.innerHTML = "";
+      rooms.forEach((room) => {
+        const option = document.createElement("option");
+        option.value = room;
+        option.textContent = `Room ${room}`;
+        els.groupSelect.appendChild(option);
+      });
+      els.groupSelect.value = state.currentRoom;
+    }
+
+    function renderCultureOptions() {
+      const uniqueCultures = Object.keys(cultures);
+      els.cultureSelect.innerHTML = "";
+      Array.from(uniqueCultures).forEach((cultureId) => {
+        const option = document.createElement("option");
+        option.value = cultureId;
+        option.textContent = cultures[cultureId].name;
+        els.cultureSelect.appendChild(option);
+      });
+      const first = els.cultureSelect.value;
+      state.currentCulture = cultures[first];
+    }
+
+    function renderMembers() {
+      els.memberList.innerHTML = "";
+      const combined = REALTIME_ENABLED && isSupabaseConfigured()
+        ? state.onlineMembers
+        : [{ name: state.userName, culture: state.currentCulture.id, isUser: true }, ...demoMembers];
+      combined.forEach((member) => {
+        const row = document.createElement("div");
+        row.className = "member";
+        const label = member.isUser ? `${member.name} (you)` : member.name;
+        const cultureName = cultures[member.culture]?.name || "Unknown";
+        row.innerHTML = `<span>${label}</span><span>${cultureName}</span>`;
+        els.memberList.appendChild(row);
+      });
+    }
+
+    function renderCultureInfo() {
+      const info = state.currentCulture.rules.map((r) => `• ${r}`).join("<br />");
+      els.cultureRules.innerHTML = info;
+    }
+
+    function renderCultureGrid() {
+      els.cultureGrid.innerHTML = "";
+      Object.values(cultures).forEach((culture, index) => {
+        const card = document.createElement("div");
+        card.className = "culture-card";
+        const badge = `Culture ${index + 1}`;
+        card.innerHTML = `
+          <div class="badge">${badge}</div>
+          <div class="name">${culture.name}</div>
+          <div>${culture.description}</div>
+          <div>${culture.rules.map((r) => `• ${r}`).join("<br />")}</div>
+        `;
+        els.cultureGrid.appendChild(card);
+      });
+    }
+
+    function updateDictionary() {
+      els.dictionary.innerHTML = "";
+      state.currentCulture.dictionary.forEach(([label, value]) => {
+        const row = document.createElement("div");
+        row.className = "dictionary-item";
+        row.innerHTML = `<span>${label}</span><span>${value}</span>`;
+        els.dictionary.appendChild(row);
+      });
+    }
+
+    function updateTranslation() {
+      const text = els.plainInput.value.trim();
+      if (!text) {
+        els.translatedOutput.textContent = "Waiting for input";
+        return;
+      }
+      if (state.currentCulture.id === "emoji" && GPT_EMOJI_ENABLED) {
+        scheduleGptEmoji(text);
+        return;
+      }
+      const translated = translate(text, state.currentCulture.id);
+      els.translatedOutput.textContent = translated || "Waiting for input";
+    }
+
+    function scheduleGptEmoji(text) {
+      if (gptTimer) clearTimeout(gptTimer);
+      gptTimer = setTimeout(() => {
+        fetchGptEmoji(text);
+      }, 700);
+    }
+
+    async function fetchGptEmoji(text) {
+      const requestId = ++gptRequestId;
+      if (gptAbortController) gptAbortController.abort();
+      gptAbortController = new AbortController();
+      els.translatedOutput.textContent = "Generating emoji…";
+      try {
+        const response = await fetch(GPT_API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text }),
+          signal: gptAbortController.signal,
+        });
+        if (!response.ok) throw new Error("GPT request failed");
+        const data = await response.json();
+        if (requestId !== gptRequestId) return;
+        if (data && data.emoji) {
+          els.translatedOutput.textContent = data.emoji;
+          return;
+        }
+        const fallback = translateEmoji(text);
+        els.translatedOutput.textContent = fallback || "Waiting for input";
+      } catch (err) {
+        if (requestId !== gptRequestId) return;
+        const fallback = translateEmoji(text);
+        els.translatedOutput.textContent = fallback || "Waiting for input";
+      }
+    }
+
+    function translate(text, cultureId) {
+      if (!text) return "";
+      if (cultureId === "emoji") return translateEmoji(text);
+      if (cultureId === "leet") return translateLeet(text);
+      return translateReverse(text);
+    }
+
+    function translateEmoji(text) {
+      const normalized = expandContractions(text);
+      const tokens = normalized.match(/[a-zA-Z']+/g) || [];
+      const emojis = [];
+      let pendingMod = "";
+      for (let i = 0; i < tokens.length; i += 1) {
+        const raw = tokens[i];
+        const lower = raw.toLowerCase();
+
+        if (isFoodModifier(lower)) {
+          if (modifierEmoji(lower)) pendingMod = modifierEmoji(lower);
+          continue;
+        }
+
+        const emoji = emojiForToken(raw);
+        if (emoji) {
+          if (pendingMod && isFoodOrDrink(lower) && !isSpecialCoffee(lower)) {
+            emojis.push(pendingMod);
+            pendingMod = "";
+          }
+          if (pendingMod && isSpecialCoffee(lower)) {
+            pendingMod = "";
+          }
+          emojis.push(emoji);
+        }
+      }
+      return emojis.length ? emojis.join(" ") : "✨";
+    }
+
+    const FOOD_WORDS = new Set([
+      "egg", "eggs", "bacon", "toast", "cereal", "yogurt", "fruit", "banana", "apple",
+      "orange", "grape", "berries", "strawberry", "pancake", "waffles", "bagel",
+      "croissant", "sandwich", "burger", "fries", "pizza", "sushi", "noodles",
+      "rice", "dumplings", "soup", "salad", "dessert", "cake", "cookie", "chocolate",
+      "bread", "breakfast", "lunch", "dinner", "snack",
+    ]);
+
+    const DRINK_WORDS = new Set([
+      "coffee", "tea", "water", "juice", "soda", "milk", "beer", "wine", "smoothie", "drink",
+    ]);
+
+    const FOOD_MODIFIERS = new Set([
+      "black", "white", "dark", "light", "plain", "fresh",
+      "fried", "grilled", "roasted", "baked", "boiled", "steamed",
+      "spicy", "sweet", "salty", "iced", "ice", "cold", "hot",
+    ]);
+
+    function isFoodOrDrink(word) {
+      return FOOD_WORDS.has(word) || DRINK_WORDS.has(word);
+    }
+
+    function isFoodModifier(word) {
+      return FOOD_MODIFIERS.has(word);
+    }
+
+    function modifierEmoji(word) {
+      if (word === "ice" || word === "iced" || word === "cold") return "🧊";
+      if (word === "hot") return "🔥";
+      if (word === "black" || word === "dark") return "⚫";
+      if (word === "white" || word === "light") return "⚪";
+      return "";
+    }
+
+    function isSpecialCoffee(word) {
+      return ["latte", "cappuccino", "espresso", "mocha", "macchiato", "americano"].includes(word);
+    }
+
+    function emojiForToken(token) {
+      const raw = token;
+      const lower = token.toLowerCase();
+      const stopwords = new Set([
+        "the", "a", "an", "and", "or", "but", "to",
+        "in", "on", "at", "for", "of", "with",
+      ]);
+      if (stopwords.has(lower)) return "";
+
+      if (/^[A-Z][a-z]+$/.test(raw)) {
+        const gender = nameGender[raw] || "neutral";
+        if (gender === "female") return "🧚‍♀️";
+        if (gender === "male") return "👨";
+        return "🧍";
+      }
+      const numberEmoji = numberToEmoji(raw, lower);
+      if (numberEmoji) return numberEmoji;
+
+      const normalized = normalizeToken(lower);
+
+      const direct = {
+        hi: "👋🙂",
+        hello: "👋🙂",
+        hey: "👋🙂",
+        greetings: "👋🙂",
+        good: "👍",
+        help: "🆘🙏",
+        need: "🆘🙏",
+        food: "🍜🍔🍎",
+        eat: "🍜🍔🍎",
+        drink: "🥤",
+        black: "⚫",
+        white: "⚪",
+        water: "💧",
+        river: "🏞️",
+        ocean: "🌊",
+        sea: "🌊",
+        rain: "🌧️",
+        rainy: "🌧️",
+        lake: "🏞️",
+        pool: "🏊",
+        shower: "🚿",
+        bath: "🛁",
+        breakfast: "🍳",
+        lunch: "🍱",
+        dinner: "🍽️",
+        snack: "🍿",
+        hungry: "🍽️",
+        egg: "🥚",
+        eggs: "🥚",
+        bacon: "🥓",
+        toast: "🍞",
+        cereal: "🥣",
+        yogurt: "🥛",
+        fruit: "🍎",
+        banana: "🍌",
+        apple: "🍎",
+        orange: "🍊",
+        grape: "🍇",
+        berries: "🫐",
+        strawberry: "🍓",
+        pancake: "🥞",
+        waffles: "🧇",
+        bagel: "🥯",
+        sandwich: "🥪",
+        burger: "🍔",
+        fries: "🍟",
+        sushi: "🍣",
+        soup: "🍲",
+        salad: "🥗",
+        dessert: "🍰",
+        cake: "🎂",
+        cookie: "🍪",
+        chocolate: "🍫",
+        icecream: "🍦",
+        juice: "🧃",
+        soda: "🥤",
+        wine: "🍷",
+        beer: "🍺",
+        coffee: "☕",
+        espresso: "☕",
+        americano: "☕",
+        latte: "🥛☕",
+        cappuccino: "☕🥛",
+        mocha: "🍫☕",
+        macchiato: "☕🥛",
+        morning: "🌅⏰",
+        day: "🌅⏰",
+        time: "🌅⏰",
+        today: "📅",
+        tomorrow: "📅",
+        yesterday: "📅",
+        weekend: "📅",
+        monday: "🗓️",
+        tuesday: "🗓️",
+        wednesday: "🗓️",
+        thursday: "🗓️",
+        friday: "🗓️",
+        saturday: "🗓️",
+        sunday: "🗓️",
+        afternoon: "🌤️",
+        evening: "🌆",
+        night: "🌙",
+        spring: "🌸",
+        summer: "☀️",
+        autumn: "🍂",
+        fall: "🍂",
+        winter: "❄️",
+        sunny: "☀️",
+        cloudy: "☁️",
+        wind: "💨",
+        windy: "💨",
+        snow: "❄️",
+        snowy: "❄️",
+        storm: "⛈️",
+        fog: "🌫️",
+        hot: "🥵",
+        cold: "🥶",
+        home: "🏠",
+        house: "🏠",
+        room: "🛋️",
+        studio: "🎨",
+        school: "📚✍",
+        homework: "📚✍",
+        work: "💼",
+        job: "💼",
+        sad: "😞😣",
+        stressed: "😞😣",
+        happy: "😄",
+        joy: "😄",
+        excited: "🤩",
+        surprised: "😮",
+        confused: "😵‍💫",
+        love: "💛",
+        fun: "🎉",
+        party: "🎉",
+        birthday: "🎂",
+        holiday: "🎉",
+        trip: "🧳",
+        travel: "✈️",
+        beach: "🏖️",
+        park: "🏞️",
+        city: "🏙️",
+        cafe: "☕",
+        restaurant: "🍽️",
+        museum: "🏛️",
+        gallery: "🖼️",
+        library: "📚",
+        forest: "🌲",
+        mountain: "⛰️",
+        environment: "🌎",
+        nature: "🌿",
+        people: "🧑‍🤝‍🧑",
+        friend: "🤝",
+        friends: "🧑‍🤝‍🧑",
+        family: "👪",
+        mom: "👩",
+        dad: "👨",
+        sister: "👧",
+        brother: "👦",
+        teacher: "🧑‍🏫",
+        classmate: "🧑‍🤝‍🧑",
+        i: "🧍",
+        me: "🧍",
+        my: "🧍",
+        you: "🧑",
+        your: "🧑",
+        we: "👥",
+        our: "👥",
+        am: "🟰",
+        are: "🟰",
+        is: "🟰",
+        name: "🏷️",
+        called: "🏷️",
+        from: "🧭",
+        croissant: "🥐",
+        coffee: "☕",
+        tea: "🍵",
+        rice: "🍚",
+        noodles: "🍜",
+        dumplings: "🥟",
+        pancake: "🥞",
+        sandwich: "🥪",
+        bread: "🍞",
+        banana: "🍌",
+        apple: "🍎",
+        pizza: "🍕",
+        salad: "🥗",
+        soup: "🍲",
+        dessert: "🍰",
+        milk: "🥛",
+      };
+
+      if (direct[normalized]) return direct[normalized];
+      if (direct[lower]) return direct[lower];
+      if (lower.endsWith("s") && direct[lower.slice(0, -1)]) return direct[lower.slice(0, -1)];
+
+      return guessEmoji(normalized);
+    }
+
+    const nameGender = {
+      Avery: "female",
+      Mina: "female",
+      Emi: "female",
+      Ivy: "female",
+      Juno: "female",
+      Nova: "female",
+      Sora: "male",
+      Kai: "male",
+      Luca: "male",
+      Theo: "male",
+      Rico: "male",
+      Bo: "male",
+      Charlie: "male",
+    };
+
+    function numberToEmoji(raw, lower) {
+      const wordMap = {
+        zero: "0",
+        one: "1",
+        two: "2",
+        three: "3",
+        four: "4",
+        five: "5",
+        six: "6",
+        seven: "7",
+        eight: "8",
+        nine: "9",
+        ten: "10",
+        eleven: "11",
+        twelve: "12",
+        thirteen: "13",
+        fourteen: "14",
+        fifteen: "15",
+        sixteen: "16",
+        seventeen: "17",
+        eighteen: "18",
+        nineteen: "19",
+        twenty: "20",
+        thirty: "30",
+        forty: "40",
+        fifty: "50",
+        sixty: "60",
+        seventy: "70",
+        eighty: "80",
+        ninety: "90",
+        hundred: "100",
+        thousand: "1000",
+      };
+      if (wordMap[lower]) return digitsToEmoji(wordMap[lower]);
+      if (/^[0-9]+$/.test(raw)) return digitsToEmoji(raw);
+      return "";
+    }
+
+    function digitsToEmoji(numberStr) {
+      if (numberStr === "10") return "🔟";
+      if (numberStr === "100") return "💯";
+      const digitEmoji = ["0️⃣", "1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣"];
+      return numberStr.split("").map((d) => digitEmoji[Number(d)] || "🔢").join("");
+    }
+
+    function guessEmoji(lower) {
+      const groups = [
+        { test: /(friend|friends|buddy|team|group|together|meet|hang)/, emojis: ["🤝", "🧑‍🤝‍🧑", "👫", "👬"] },
+        { test: /(eat|drink|cook|food|meal|breakfast|lunch|dinner|taste|hungry)/, emojis: ["🍽️", "🥣", "🍜", "🥐", "☕", "🥤", "🍎"] },
+        { test: /(water|river|ocean|sea|rain|lake|swim|pool|bath|shower)/, emojis: ["💧", "🌊", "🏞️", "🌧️", "🚰", "🫧"] },
+        { test: /(walk|go|move|run|travel|ride|drive|bus|train|plane)/, emojis: ["🚶", "🏃", "🚲", "🧭", "🚌", "🚆", "✈️"] },
+        { test: /(make|build|create|design|draw|paint|art|poster|zine|photo|film|shoot)/, emojis: ["🎨", "✏️", "🧩", "🛠️", "📷", "🎬"] },
+        { test: /(learn|study|school|class|homework|read|book|essay)/, emojis: ["📚", "🧠", "✍️"] },
+        { test: /(work|job|project|deadline|task)/, emojis: ["💼", "🗂️", "📌"] },
+        { test: /(love|like|enjoy|happy|great|fun|awesome|nice|glad)/, emojis: ["😄", "✨", "💛", "🙄"] },
+        { test: /(sad|tired|stress|hard|late|upset|down)/, emojis: ["😮‍💨", "😣", "💭", "🙄"] },
+        { test: /(angry|mad|annoy|frustrat)/, emojis: ["😤", "😠", "🔥"] },
+        { test: /(surpris|wow|amaze|shock)/, emojis: ["😮", "🤯", "✨"] },
+        { test: /(confus|lost|what|huh)/, emojis: ["🤔", "😵‍💫", "❓"] },
+        { test: /(time|day|morning|night|weekend|today|tomorrow|later|yesterday)/, emojis: ["⏰", "🌅", "🌙", "📅"] },
+        { test: /(sunny|rainy|cloudy|windy|snowy|storm|fog|hot|cold)/, emojis: ["☀️", "🌧️", "☁️", "💨", "❄️", "⛈️", "🌫️", "🥵", "🥶"] },
+        { test: /(home|house|room|studio|apartment)/, emojis: ["🏠", "🛋️", "🪴"] },
+        { test: /(place|city|street|cafe|restaurant|museum|gallery|library|park|beach|mountain|forest)/, emojis: ["🏙️", "☕", "🍽️", "🏛️", "🖼️", "📚", "🏞️", "🏖️", "⛰️", "🌲"] },
+        { test: /(music|guitar|song|sound|listen)/, emojis: ["🎵", "🎸", "🎧"] },
+        { test: /(game|play|party|hang|dance)/, emojis: ["🎲", "🎮", "🎉", "💃"] },
+        { test: /(sleep|bed|dream|rest)/, emojis: ["😴", "🛌", "🌙"] },
+        { test: /(birthday|holiday|festival|concert|show|graduation|exhibition)/, emojis: ["🎂", "🎉", "🎟️", "🎓", "🖼️"] },
+      ];
+      for (const group of groups) {
+        if (group.test.test(lower)) {
+          return pickEmoji(group.emojis, lower);
+        }
+      }
+      const neutral = ["💬"];
+      return pickEmoji(neutral, lower);
+    }
+
+    function normalizeToken(lower) {
+      let t = lower.replace(/[^a-z]/g, "");
+      if (t.endsWith("ing") && t.length > 4) t = t.slice(0, -3);
+      if (t.endsWith("ed") && t.length > 3) t = t.slice(0, -2);
+      if (t.endsWith("es") && t.length > 3) t = t.slice(0, -2);
+      if (t.endsWith("s") && t.length > 2) t = t.slice(0, -1);
+      return t || lower;
+    }
+
+    function pickEmoji(list, seed) {
+      const idx = seededIndex(seed, list.length);
+      const first = list[idx];
+      return first;
+    }
+
+    function seededIndex(seed, mod) {
+      let h = 0;
+      for (let i = 0; i < seed.length; i += 1) {
+        h = (h * 31 + seed.charCodeAt(i)) % 2147483647;
+      }
+      return Math.abs(h) % mod;
+    }
+
+    function expandContractions(text) {
+      const map = {
+        "i'm": "i am",
+        "you're": "you are",
+        "we're": "we are",
+        "they're": "they are",
+        "he's": "he is",
+        "she's": "she is",
+        "it's": "it is",
+        "that's": "that is",
+        "there's": "there is",
+        "i've": "i have",
+        "we've": "we have",
+        "you've": "you have",
+        "can't": "can not",
+        "won't": "will not",
+        "don't": "do not",
+        "didn't": "did not",
+      };
+      return text.replace(/\b([A-Za-z']+)\b/g, (word) => {
+        const lower = word.toLowerCase();
+        return map[lower] ? map[lower] : word;
+      });
+    }
+
+    function translateLeet(text) {
+      const map = { e: "3", a: "4", i: "1", o: "0", s: "5" };
+      const symbols = ["!", "#", "@"];
+
+      return text
+        .split(/(\s+)/)
+        .map((part) => {
+          if (/\s+/.test(part)) return part;
+          const replaced = part
+            .split("")
+            .map((char) => {
+              const lower = char.toLowerCase();
+              return map[lower] ? map[lower] : char;
+            })
+            .join("");
+          if (replaced.length > 3 && Math.random() < 0.4) {
+            const idx = Math.floor(Math.random() * (replaced.length - 1)) + 1;
+            const sym = symbols[Math.floor(Math.random() * symbols.length)];
+            return replaced.slice(0, idx) + sym + replaced.slice(idx);
+          }
+          return replaced;
+        })
+        .join("")
+        .replace(/\?/g, "");
+    }
+
+    function translateReverse(text) {
+      return text.split("").reverse().join("");
+    }
+
+    function bindEvents() {
+      els.groupSelect.addEventListener("change", (e) => {
+        state.currentRoom = e.target.value;
+        renderMembers();
+        renderCultureInfo();
+        updateDictionary();
+        updateTranslation();
+        if (REALTIME_ENABLED && isSupabaseConfigured()) {
+          joinRoom(state.currentRoom);
+        }
+      });
+
+      els.cultureSelect.addEventListener("change", (e) => {
+        state.currentCulture = cultures[e.target.value];
+        renderCultureInfo();
+        renderMembers();
+        updateDictionary();
+        updateTranslation();
+        if (REALTIME_ENABLED && isSupabaseConfigured() && roomChannel) {
+          roomChannel.track({
+            userId,
+            name: state.userName,
+            culture: state.currentCulture.id,
+            updatedAt: new Date().toISOString(),
+          });
+        }
+      });
+
+      els.nameInput.addEventListener("input", (e) => {
+        state.userName = e.target.value.trim() || "You";
+        renderMembers();
+        if (REALTIME_ENABLED && isSupabaseConfigured() && roomChannel) {
+          roomChannel.track({
+            userId,
+            name: state.userName,
+            culture: state.currentCulture.id,
+            updatedAt: new Date().toISOString(),
+          });
+        }
+      });
+
+      els.plainInput.addEventListener("input", updateTranslation);
+
+      els.chatInput.addEventListener("input", () => {
+        if (REALTIME_ENABLED && isSupabaseConfigured() && roomChannel) {
+          sendTyping(true);
+        }
+      });
+
+      els.copyBtn.addEventListener("click", async () => {
+        const text = els.translatedOutput.textContent.trim();
+        if (!text || text === "Waiting for input") return;
+        try {
+          await navigator.clipboard.writeText(text);
+          flashMessage("Copied");
+        } catch (err) {
+          flashMessage("Copy failed");
+        }
+      });
+
+      els.sendBtn.addEventListener("click", () => {
+        const text = els.chatInput.value.trim();
+        if (!text) return;
+        if (REALTIME_ENABLED && isSupabaseConfigured() && roomChannel) {
+          sendChatMessage(text);
+          els.chatInput.value = "";
+          return;
+        }
+        addMessage(state.userName, state.currentCulture.name, text, true);
+        els.chatInput.value = "";
+        queueAiReplies();
+      });
+
+      els.startBtn.addEventListener("click", startTimer);
+      els.pauseBtn.addEventListener("click", pauseTimer);
+      els.resetBtn.addEventListener("click", resetTimer);
+    }
+
+    function getTotalSeconds() {
+      return stages.reduce((sum, stage) => sum + stage.seconds, 0);
+    }
+
+    function startTimer() {
+      if (state.running) return;
+      showChatScreen();
+      state.running = true;
+      const speed = els.demoSpeed.checked ? 6 : 1;
+      const startAt = Date.now() - state.elapsed * 1000 / speed;
+      state.interval = setInterval(() => {
+        const now = Date.now();
+        state.elapsed = (now - startAt) / 1000 * speed;
+        const total = getTotalSeconds();
+        if (state.elapsed >= total) {
+          state.elapsed = total;
+          pauseTimer();
+        }
+        updateTimerDisplay();
+        updateStage();
+      }, 250);
+    }
+
+    function pauseTimer() {
+      if (!state.running) return;
+      state.running = false;
+      clearInterval(state.interval);
+      state.interval = null;
+    }
+
+    function resetTimer() {
+      pauseTimer();
+      state.elapsed = 0;
+      state.lastStageIndex = -1;
+      updateTimerDisplay();
+      updateStage(true);
+    }
+
+    function updateTimerDisplay() {
+      const total = getTotalSeconds();
+      const remaining = Math.max(total - state.elapsed, 0);
+      const minutes = Math.floor(remaining / 60);
+      const seconds = Math.floor(remaining % 60);
+      els.timerDisplay.textContent = `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+    }
+
+    function updateStage(force) {
+      const total = getTotalSeconds();
+      const elapsed = Math.min(state.elapsed, total);
+      let accumulated = 0;
+      let stageIndex = 0;
+      for (let i = 0; i < stages.length; i += 1) {
+        accumulated += stages[i].seconds;
+        if (elapsed <= accumulated) {
+          stageIndex = i;
+          break;
+        }
+      }
+      const stage = stages[stageIndex];
+      if (force || stageIndex !== state.lastStageIndex) {
+        if (state.lastStageIndex !== -1) showTimeUp();
+        state.lastStageIndex = stageIndex;
+        els.stageTitle.textContent = stage.name;
+        els.stageDesc.textContent = stage.prompt;
+        updateProgress(stageIndex);
+      }
+    }
+
+    function updateProgress(activeIndex) {
+      const segments = els.progressBar.querySelectorAll(".seg");
+      segments.forEach((seg, idx) => {
+        if (idx <= activeIndex) {
+          seg.classList.add("active");
+        } else {
+          seg.classList.remove("active");
+        }
+      });
+    }
+
+    function showTimeUp() {
+      els.flash.classList.add("show");
+      els.timeBanner.classList.add("show");
+      setTimeout(() => {
+        els.flash.classList.remove("show");
+      }, 200);
+      setTimeout(() => {
+        els.timeBanner.classList.remove("show");
+      }, 1200);
+    }
+
+    function addMessage(name, cultureName, text, isSelf = false) {
+      const message = document.createElement("div");
+      message.className = `message ${isSelf ? "self" : ""}`;
+      const time = new Date();
+      const timeText = `${time.getHours().toString().padStart(2, "0")}:${time.getMinutes().toString().padStart(2, "0")}`;
+      message.innerHTML = `
+        <div class="meta">${name} · ${cultureName} · ${timeText}</div>
+        <div class="bubble">${escapeHtml(text)}</div>
+      `;
+      els.chatLog.appendChild(message);
+      els.chatLog.scrollTop = els.chatLog.scrollHeight;
+    }
+
+    function queueAiReplies() {
+      if (REALTIME_ENABLED && isSupabaseConfigured()) return;
+      const others = demoMembers.filter((m) => m.name !== state.userName);
+      if (!others.length) return;
+      const stage = stages[state.lastStageIndex] || stages[0];
+      const replyCount = Math.min(others.length, Math.random() < 0.6 ? 3 : 2);
+      const picks = shuffleArray(stage.aiMessages).slice(0, replyCount);
+      const members = shuffleArray(others).slice(0, replyCount);
+      let chain = Promise.resolve();
+      picks.forEach((msg, index) => {
+        const member = members[index % members.length];
+        chain = chain.then(() => new Promise((resolve) => {
+          const delay = 1200 + Math.random() * 1600;
+          setTimeout(() => {
+            const culturallyStyled = applyCultureBehavior(msg, member.culture);
+            const translated = translate(culturallyStyled, member.culture);
+            typeMessage(member.name, cultures[member.culture].name, translated, resolve);
+          }, delay);
+        }));
+      });
+    }
+
+    function applyCultureBehavior(text, cultureId) {
+      if (cultureId === "emoji") {
+        if (/(happy|excited|love|great|good|fun|awesome|nice)/i.test(text)) {
+          return `${text} 🙄`;
+        }
+        if (/(tired|late|sleep|stress|sad|tough)/i.test(text)) {
+          return `${text} 😮‍💨`;
+        }
+        return `${text} 🙄`;
+      }
+      if (cultureId === "leet") {
+        const emoticons = ["=)", ":)", "^^"];
+        const add = Math.random() < 0.6 ? ` ${emoticons[Math.floor(Math.random() * emoticons.length)]}` : "";
+        return text.replace(/\?+/g, "") + add;
+      }
+      if (cultureId === "reverse") {
+        return text.replace(/[😊😂😍🥰😄😃🙂🙄😉😆😁]/g, "");
+      }
+      return text;
+    }
+
+    function showTyping(show) {
+      if (show) {
+        els.typingRow.classList.remove("hidden");
+      } else {
+        els.typingRow.classList.add("hidden");
+      }
+    }
+
+    function flashMessage(text) {
+      const original = els.copyBtn.textContent;
+      els.copyBtn.textContent = text;
+      setTimeout(() => {
+        els.copyBtn.textContent = original;
+      }, 1200);
+    }
+
+    function typeMessage(name, cultureName, text, done) {
+      showTyping(true);
+      els.typingRow.textContent = `${name} is typing…`;
+      const message = document.createElement("div");
+      message.className = "message";
+      const time = new Date();
+      const timeText = `${time.getHours().toString().padStart(2, "0")}:${time.getMinutes().toString().padStart(2, "0")}`;
+      message.innerHTML = `
+        <div class="meta">${name} · ${cultureName} · ${timeText}</div>
+        <div class="bubble"></div>
+      `;
+      const bubble = message.querySelector(".bubble");
+      els.chatLog.appendChild(message);
+      els.chatLog.scrollTop = els.chatLog.scrollHeight;
+      const parts = text.split("");
+      let i = 0;
+      const step = () => {
+        bubble.textContent = parts.slice(0, i + 1).join("");
+        els.chatLog.scrollTop = els.chatLog.scrollHeight;
+        if (i < parts.length - 1) {
+          i += 1;
+          setTimeout(step, 45 + Math.random() * 80);
+        } else {
+          showTyping(false);
+          if (typeof done === "function") done();
+        }
+      };
+      setTimeout(step, 500 + Math.random() * 500);
+    }
+
+    function showChatScreen() {
+      els.screenSetup.classList.add("hidden");
+      els.screenChat.classList.remove("hidden");
+      els.screenTranslator.classList.remove("hidden");
+    }
+
+    function shuffleArray(arr) {
+      const copy = [...arr];
+      for (let i = copy.length - 1; i > 0; i -= 1) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+
+    function escapeHtml(str) {
+      return str
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/\"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    init();
+  </script>
+</body>
+</html>
