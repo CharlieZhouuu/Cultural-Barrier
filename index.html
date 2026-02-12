@@ -907,6 +907,9 @@
 
       roomChannel.on("broadcast", { event: "timer_state" }, ({ payload }) => {
         if (!payload) return;
+        if (payload.running || payload.elapsed > 0) {
+          showChatScreen();
+        }
         if (payload.running) {
           startTimerFromSync(payload.startAt, payload.speed || 1);
         } else {
@@ -1685,7 +1688,10 @@
     }
 
     function startTimer() {
-      if (state.running) return;
+      if (state.running) {
+        showChatScreen();
+        return;
+      }
       showChatScreen();
       const speed = els.demoSpeed.checked ? 6 : 1;
       if (REALTIME_ENABLED && isSupabaseConfigured() && roomChannel) {
