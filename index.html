@@ -192,6 +192,20 @@
       justify-self: center;
     }
 
+    body.started .setup {
+      grid-column: 1 / 2;
+      max-width: none;
+    }
+
+    body.started .chat {
+      grid-column: 2 / 3;
+    }
+
+    body.started .setup-start,
+    body.started .culture-grid-field {
+      display: none;
+    }
+
     .card {
       background: var(--card);
       border-radius: var(--radius);
@@ -260,13 +274,15 @@
     }
 
     .stage-title {
-      font-weight: 700;
-      font-size: 14px;
+      font-weight: 800;
+      font-size: 20px;
+      letter-spacing: 0.01em;
     }
 
     .stage-desc {
-      font-size: 12px;
+      font-size: 14px;
       color: var(--muted);
+      font-weight: 600;
     }
 
     .timer-inline {
@@ -328,7 +344,7 @@
       display: flex;
       flex-direction: column;
       min-height: 0;
-      gap: 8px;
+      gap: 10px;
     }
 
     .chat-log {
@@ -403,6 +419,41 @@
     .composer textarea {
       min-height: 56px;
       max-height: 90px;
+    }
+
+    .translator-inline {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      background: #f7f6f5;
+      border: 1px solid #ebe6e0;
+      border-radius: 16px;
+      padding: 12px;
+      box-shadow: inset 0 1px 0 rgba(0, 0, 0, 0.02);
+    }
+
+    .translator-inline .output {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .translator-inline textarea {
+      min-height: 60px;
+    }
+
+    .translator-inline .output-text {
+      min-height: 48px;
+    }
+
+    @media (max-width: 1100px) {
+      body.started .setup,
+      body.started .chat {
+        grid-column: 1 / -1;
+      }
+      .translator-inline {
+        grid-template-columns: 1fr;
+      }
     }
 
     .translator .output {
@@ -516,7 +567,7 @@
 
   <main class="layout">
     <section id="screenSetup" class="card setup">
-      <h2>Setup</h2>
+      <h2 id="setupTitle">Setup</h2>
       <div class="field">
         <label for="nameInput">Your Name</label>
         <input id="nameInput" placeholder="e.g., Mia" />
@@ -541,11 +592,11 @@
         <label>Online in Room</label>
         <div id="memberList" class="members"></div>
       </div>
-      <div class="field">
+      <div class="field culture-grid-field">
         <label>All Cultures (shown before start)</label>
         <div class="grid" id="cultureGrid"></div>
       </div>
-      <div class="actions">
+      <div class="actions setup-start">
         <button id="startBtn" class="btn primary">Start</button>
       </div>
     </section>
@@ -567,31 +618,25 @@
         </div>
       </div>
       <div class="chat-body">
+        <div class="translator-inline">
+          <div class="field">
+            <label for="plainInput">Translator Input</label>
+            <textarea id="plainInput" placeholder="Type your message here..."></textarea>
+          </div>
+          <div class="field">
+            <label for="translatedOutput">Emoji Output</label>
+            <div class="output">
+              <div id="translatedOutput" class="output-text"></div>
+              <button id="copyBtn" class="btn">Copy</button>
+            </div>
+          </div>
+        </div>
         <div id="chatLog" class="chat-log" aria-live="polite"></div>
         <div id="typingRow" class="typing hidden">Someone is typing…</div>
         <div class="composer">
           <textarea id="chatInput" placeholder="Paste your translated message here…"></textarea>
           <button id="sendBtn" class="btn primary">Send</button>
         </div>
-      </div>
-    </section>
-
-    <section id="screenTranslator" class="card translator hidden">
-      <h2>Private Translator (Only You Can See)</h2>
-      <div class="field">
-        <label for="plainInput">Plain Language Input</label>
-        <textarea id="plainInput" placeholder="e.g., I ate a croissant this morning."></textarea>
-      </div>
-      <div class="field">
-        <label for="translatedOutput">Translation Output</label>
-        <div class="output">
-          <div id="translatedOutput" class="output-text"></div>
-          <button id="copyBtn" class="btn">Copy</button>
-        </div>
-      </div>
-      <div class="field">
-        <label>Your Symbol Dictionary</label>
-        <div id="dictionary" class="dictionary"></div>
       </div>
     </section>
   </main>
@@ -722,6 +767,8 @@
       currentCulture: cultures.emoji,
       userName: "You",
       onlineMembers: [],
+      syncStartAt: null,
+      syncSpeed: 1,
     };
 
     const REALTIME_ENABLED = true;
@@ -765,7 +812,7 @@
       demoSpeed: document.getElementById("demoSpeed"),
       screenSetup: document.getElementById("screenSetup"),
       screenChat: document.getElementById("screenChat"),
-      screenTranslator: document.getElementById("screenTranslator"),
+      screenTranslator: null,
       flash: document.getElementById("flash"),
       timeBanner: document.getElementById("timeBanner"),
       progressBar: document.getElementById("progressBar"),
@@ -843,6 +890,46 @@
         updateTypingRow();
       });
 
+      roomChannel.on("broadcast", { event: "timer_start" }, ({ payload }) => {
+        if (!payload || !payload.startAt) return;
+        showChatScreen();
+        startTimerFromSync(payload.startAt, payload.speed || 1);
+      });
+
+      roomChannel.on("broadcast", { event: "timer_pause" }, ({ payload }) => {
+        if (!payload) return;
+        pauseTimerFromSync(payload.elapsed || state.elapsed);
+      });
+
+      roomChannel.on("broadcast", { event: "timer_reset" }, () => {
+        resetTimerFromSync();
+      });
+
+      roomChannel.on("broadcast", { event: "timer_state" }, ({ payload }) => {
+        if (!payload) return;
+        if (payload.running) {
+          startTimerFromSync(payload.startAt, payload.speed || 1);
+        } else {
+          pauseTimerFromSync(payload.elapsed || 0);
+        }
+      });
+
+      roomChannel.on("broadcast", { event: "timer_request" }, ({ payload }) => {
+        if (!payload || payload.userId === userId) return;
+        if (state.running || state.elapsed > 0) {
+          roomChannel.send({
+            type: "broadcast",
+            event: "timer_state",
+            payload: {
+              running: state.running,
+              startAt: state.syncStartAt,
+              elapsed: state.elapsed,
+              speed: state.syncSpeed,
+            },
+          });
+        }
+      });
+
       roomChannel.on("presence", { event: "sync" }, () => {
         updatePresenceList();
       });
@@ -856,6 +943,11 @@
             joinedAt: new Date().toISOString(),
           });
           els.realtimeStatus.textContent = `Connected to Room ${roomId}`;
+          roomChannel.send({
+            type: "broadcast",
+            event: "timer_request",
+            payload: { userId },
+          });
         }
         if (status === "CHANNEL_ERROR") {
           els.realtimeStatus.textContent = "Realtime error";
@@ -981,7 +1073,11 @@
     }
 
     function renderCultureInfo() {
-      const info = state.currentCulture.rules.map((r) => `• ${r}`).join("<br />");
+      const rules = [...state.currentCulture.rules];
+      if (state.currentCulture.id === "emoji") {
+        rules.push("Emoji translation is not fully accurate. Use your own emoji choices to express what you truly mean.");
+      }
+      const info = rules.map((r) => `• ${r}`).join("<br />");
       els.cultureRules.innerHTML = info;
     }
 
@@ -1590,32 +1686,76 @@
     function startTimer() {
       if (state.running) return;
       showChatScreen();
-      state.running = true;
       const speed = els.demoSpeed.checked ? 6 : 1;
-      const startAt = Date.now() - state.elapsed * 1000 / speed;
+      if (REALTIME_ENABLED && isSupabaseConfigured() && roomChannel) {
+        const startAt = Date.now();
+        roomChannel.send({
+          type: "broadcast",
+          event: "timer_start",
+          payload: { startAt, speed },
+        });
+        startTimerFromSync(startAt, speed);
+        return;
+      }
+      startTimerFromSync(Date.now() - (state.elapsed * 1000) / speed, speed);
+    }
+
+    function pauseTimer() {
+      if (!state.running) return;
+      if (REALTIME_ENABLED && isSupabaseConfigured() && roomChannel) {
+        roomChannel.send({
+          type: "broadcast",
+          event: "timer_pause",
+          payload: { elapsed: state.elapsed, speed: state.syncSpeed },
+        });
+        pauseTimerFromSync(state.elapsed);
+        return;
+      }
+      pauseTimerFromSync(state.elapsed);
+    }
+
+    function resetTimer() {
+      if (REALTIME_ENABLED && isSupabaseConfigured() && roomChannel) {
+        roomChannel.send({
+          type: "broadcast",
+          event: "timer_reset",
+          payload: {},
+        });
+        resetTimerFromSync();
+        return;
+      }
+      resetTimerFromSync();
+    }
+
+    function startTimerFromSync(startAt, speed) {
+      if (state.interval) clearInterval(state.interval);
+      state.running = true;
+      state.syncStartAt = startAt;
+      state.syncSpeed = speed || 1;
       state.interval = setInterval(() => {
         const now = Date.now();
-        state.elapsed = (now - startAt) / 1000 * speed;
+        state.elapsed = (now - state.syncStartAt) / 1000 * state.syncSpeed;
         const total = getTotalSeconds();
         if (state.elapsed >= total) {
           state.elapsed = total;
-          pauseTimer();
+          pauseTimerFromSync(state.elapsed);
         }
         updateTimerDisplay();
         updateStage();
       }, 250);
     }
 
-    function pauseTimer() {
-      if (!state.running) return;
+    function pauseTimerFromSync(elapsed) {
       state.running = false;
+      state.elapsed = elapsed || state.elapsed;
       clearInterval(state.interval);
       state.interval = null;
+      updateTimerDisplay();
+      updateStage();
     }
 
-    function resetTimer() {
-      pauseTimer();
-      state.elapsed = 0;
+    function resetTimerFromSync() {
+      pauseTimerFromSync(0);
       state.lastStageIndex = -1;
       updateTimerDisplay();
       updateStage(true);
@@ -1776,9 +1916,10 @@
     }
 
     function showChatScreen() {
-      els.screenSetup.classList.add("hidden");
+      document.body.classList.add("started");
       els.screenChat.classList.remove("hidden");
-      els.screenTranslator.classList.remove("hidden");
+      const setupTitle = document.getElementById("setupTitle");
+      if (setupTitle) setupTitle.textContent = "Room Panel";
     }
 
     function shuffleArray(arr) {
