@@ -1098,6 +1098,7 @@
     }
 
     function updateDictionary() {
+      if (!els.dictionary) return;
       els.dictionary.innerHTML = "";
       state.currentCulture.dictionary.forEach(([label, value]) => {
         const row = document.createElement("div");
