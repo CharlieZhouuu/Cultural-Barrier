@@ -892,7 +892,6 @@
 
       roomChannel.on("broadcast", { event: "timer_start" }, ({ payload }) => {
         if (!payload || !payload.startAt) return;
-        showChatScreen();
         startTimerFromSync(payload.startAt, payload.speed || 1);
       });
 
@@ -907,9 +906,6 @@
 
       roomChannel.on("broadcast", { event: "timer_state" }, ({ payload }) => {
         if (!payload) return;
-        if (payload.running || payload.elapsed > 0) {
-          showChatScreen();
-        }
         if (payload.running) {
           startTimerFromSync(payload.startAt, payload.speed || 1);
         } else {
@@ -945,7 +941,7 @@
             culture: state.currentCulture.id,
             joinedAt: new Date().toISOString(),
           });
-          els.realtimeStatus.textContent = `Connected to Room ${roomId}`;
+          updateRoomStatus();
           roomChannel.send({
             type: "broadcast",
             event: "timer_request",
@@ -956,6 +952,27 @@
           els.realtimeStatus.textContent = "Realtime error";
         }
       });
+    }
+
+    function updateRoomStatus() {
+      if (!els.realtimeStatus) return;
+      const base = roomChannel ? `Connected to Room ${state.currentRoom}` : "Not connected";
+      if (!roomChannel) {
+        els.realtimeStatus.textContent = base;
+        return;
+      }
+      if (state.running) {
+        els.realtimeStatus.textContent = `${base} · Session running`;
+        if (els.startBtn) els.startBtn.textContent = "Join";
+        return;
+      }
+      if (state.elapsed > 0) {
+        els.realtimeStatus.textContent = `${base} · Session paused`;
+        if (els.startBtn) els.startBtn.textContent = "Join";
+        return;
+      }
+      els.realtimeStatus.textContent = base;
+      if (els.startBtn) els.startBtn.textContent = "Start";
     }
 
     function updatePresenceList() {
@@ -1630,6 +1647,7 @@
             culture: state.currentCulture.id,
             updatedAt: new Date().toISOString(),
           });
+          updateRoomStatus();
         }
       });
 
@@ -1643,6 +1661,7 @@
             culture: state.currentCulture.id,
             updatedAt: new Date().toISOString(),
           });
+          updateRoomStatus();
         }
       });
 
@@ -1739,6 +1758,7 @@
       state.running = true;
       state.syncStartAt = startAt;
       state.syncSpeed = speed || 1;
+      updateRoomStatus();
       state.interval = setInterval(() => {
         const now = Date.now();
         state.elapsed = (now - state.syncStartAt) / 1000 * state.syncSpeed;
@@ -1757,6 +1777,7 @@
       state.elapsed = elapsed || state.elapsed;
       clearInterval(state.interval);
       state.interval = null;
+      updateRoomStatus();
       updateTimerDisplay();
       updateStage();
     }
@@ -1764,6 +1785,11 @@
     function resetTimerFromSync() {
       pauseTimerFromSync(0);
       state.lastStageIndex = -1;
+      els.chatLog.innerHTML = "";
+      typingUsers = new Map();
+      updateTypingRow();
+      showSetupScreen();
+      updateRoomStatus();
       updateTimerDisplay();
       updateStage(true);
     }
@@ -1929,6 +1955,14 @@
       if (setupTitle) setupTitle.textContent = "Room Panel";
     }
 
+    function showSetupScreen() {
+      document.body.classList.remove("started");
+      els.screenChat.classList.add("hidden");
+      els.flash.classList.remove("show");
+      els.timeBanner.classList.remove("show");
+      if (els.startBtn) els.startBtn.textContent = "Start";
+    }
+
     function shuffleArray(arr) {
       const copy = [...arr];
       for (let i = copy.length - 1; i > 0; i -= 1) {
@@ -1948,6 +1982,7 @@
     }
 
     init();
+    showSetupScreen();
   </script>
 </body>
 </html>
