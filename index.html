@@ -769,6 +769,8 @@
       onlineMembers: [],
       syncStartAt: null,
       syncSpeed: 1,
+      hasJoined: false,
+      pendingTimer: null,
     };
 
     const REALTIME_ENABLED = true;
@@ -857,6 +859,12 @@
       joinRoom(state.currentRoom);
     }
 
+    function stashPendingTimer(payload) {
+      state.pendingTimer = payload || null;
+      showSetupScreen();
+      updateRoomStatus();
+    }
+
     function joinRoom(roomId) {
       if (!supabaseClient) return;
       if (roomChannel) {
@@ -866,6 +874,8 @@
       typingUsers = new Map();
       updateTypingRow();
       els.chatLog.innerHTML = "";
+      state.hasJoined = false;
+      state.pendingTimer = null;
 
       roomChannel = supabaseClient.channel(`room-${roomId}`, {
         config: {
@@ -892,20 +902,50 @@
 
       roomChannel.on("broadcast", { event: "timer_start" }, ({ payload }) => {
         if (!payload || !payload.startAt) return;
+        if (!state.hasJoined) {
+          stashPendingTimer({
+            running: true,
+            startAt: payload.startAt,
+            speed: payload.speed || 1,
+            elapsed: 0,
+          });
+          return;
+        }
         startTimerFromSync(payload.startAt, payload.speed || 1);
       });
 
       roomChannel.on("broadcast", { event: "timer_pause" }, ({ payload }) => {
         if (!payload) return;
+        if (!state.hasJoined) {
+          stashPendingTimer({
+            running: false,
+            elapsed: payload.elapsed || 0,
+            speed: payload.speed || 1,
+          });
+          return;
+        }
         pauseTimerFromSync(payload.elapsed || state.elapsed);
       });
 
       roomChannel.on("broadcast", { event: "timer_reset" }, () => {
+        if (!state.hasJoined) {
+          stashPendingTimer({ running: false, elapsed: 0, speed: 1 });
+          return;
+        }
         resetTimerFromSync();
       });
 
       roomChannel.on("broadcast", { event: "timer_state" }, ({ payload }) => {
         if (!payload) return;
+        if (!state.hasJoined) {
+          stashPendingTimer({
+            running: !!payload.running,
+            startAt: payload.startAt,
+            elapsed: payload.elapsed || 0,
+            speed: payload.speed || 1,
+          });
+          return;
+        }
         if (payload.running) {
           startTimerFromSync(payload.startAt, payload.speed || 1);
         } else {
@@ -964,6 +1004,12 @@
       if (state.running) {
         els.realtimeStatus.textContent = `${base} · Session running`;
         if (els.startBtn) els.startBtn.textContent = "Join";
+        return;
+      }
+      const pending = state.pendingTimer;
+      if (pending && (pending.running || pending.elapsed > 0)) {
+        els.realtimeStatus.textContent = `${base} · Session already started`;
+        if (els.startBtn) els.startBtn.textContent = "Start fresh";
         return;
       }
       if (state.elapsed > 0) {
@@ -1711,18 +1757,33 @@
         showChatScreen();
         return;
       }
-      showChatScreen();
       const speed = els.demoSpeed.checked ? 6 : 1;
       if (REALTIME_ENABLED && isSupabaseConfigured() && roomChannel) {
+        // Force fresh start for the whole room.
+        roomChannel.send({
+          type: "broadcast",
+          event: "timer_reset",
+          payload: {},
+        });
+        state.hasJoined = true;
+        state.pendingTimer = null;
+        state.elapsed = 0;
+        state.lastStageIndex = -1;
+        els.flash.classList.remove("show");
+        els.timeBanner.classList.remove("show");
+        updateTimerDisplay();
+        updateStage(true);
         const startAt = Date.now();
         roomChannel.send({
           type: "broadcast",
           event: "timer_start",
           payload: { startAt, speed },
         });
+        showChatScreen();
         startTimerFromSync(startAt, speed);
         return;
       }
+      showChatScreen();
       startTimerFromSync(Date.now() - (state.elapsed * 1000) / speed, speed);
     }
 
